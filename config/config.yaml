@@ -1,0 +1,345 @@
+# Alpaca Improved - Configuration Template
+# This file defines the structure for configuration settings
+# Environment-specific values should be set via environment variables
+
+# ============================================================================
+# Application Settings
+# ============================================================================
+app:
+  name: "Alpaca Improved"
+  version: "0.1.0"
+  environment: "${APP_ENV:development}"  # development, testing, staging, production
+  debug: ${DEBUG:true}
+  timezone: "${TIMEZONE:America/New_York}"
+  secret_key: "${SECRET_KEY:}"
+
+# ============================================================================
+# Trading Configuration
+# ============================================================================
+trading:
+  # Alpaca API Settings
+  alpaca:
+    api_key: "${ALPACA_API_KEY:}"
+    secret_key: "${ALPACA_SECRET_KEY:}"
+    base_url: "${ALPACA_BASE_URL:https://paper-api.alpaca.markets}"
+    data_url: "${ALPACA_DATA_URL:https://data.alpaca.markets}"
+    environment: "${ALPACA_TRADING_ENV:paper}"  # paper or live
+    
+  # Risk Management
+  risk:
+    max_position_size_percent: ${MAX_POSITION_SIZE_PERCENT:5.0}
+    max_daily_loss_percent: ${MAX_DAILY_LOSS_PERCENT:2.0}
+    max_open_positions: ${MAX_OPEN_POSITIONS:10}
+    force_paper_trading: ${FORCE_PAPER_TRADING:true}
+    
+  # Trading Hours
+  market_hours:
+    pre_market_start: "04:00"
+    market_open: "09:30"
+    market_close: "16:00"
+    after_hours_end: "20:00"
+    
+  # Order Settings
+  orders:
+    default_time_in_force: "day"  # day, gtc, ioc, fok
+    default_order_type: "market"  # market, limit, stop, stop_limit
+    default_order_class: "simple"  # simple, bracket, oco, oto
+
+# ============================================================================
+# Market Data Configuration
+# ============================================================================
+market_data:
+  # Primary and backup data sources
+  providers:
+    primary: "alpaca"
+    backup: ["alpha_vantage", "yahoo_finance"]
+    
+  # Alpha Vantage
+  alpha_vantage:
+    api_key: "${ALPHA_VANTAGE_API_KEY:}"
+    rate_limit: 5  # requests per minute
+    
+  # Yahoo Finance
+  yahoo_finance:
+    enabled: ${YAHOO_FINANCE_ENABLED:true}
+    rate_limit: 2000  # requests per hour
+    
+  # IEX Cloud
+  iex_cloud:
+    api_key: "${IEX_CLOUD_API_KEY:}"
+    base_url: "${IEX_CLOUD_BASE_URL:https://cloud.iexapis.com/v1}"
+    
+  # Data Update Settings
+  updates:
+    real_time_enabled: true
+    historical_data_buffer_days: 365
+    options_data_buffer_days: 30
+    intraday_update_frequency: 60  # seconds
+    
+# ============================================================================
+# Database Configuration
+# ============================================================================
+database:
+  # PostgreSQL Primary Database
+  postgresql:
+    url: "${DATABASE_URL:postgresql://user:password@localhost:5432/alpaca_improved}"
+    host: "${DATABASE_HOST:localhost}"
+    port: ${DATABASE_PORT:5432}
+    name: "${DATABASE_NAME:alpaca_improved}"
+    user: "${DATABASE_USER:alpaca_user}"
+    password: "${DATABASE_PASSWORD:}"
+    pool_size: 10
+    max_overflow: 20
+    echo: false  # Set to true for SQL query logging
+    
+  # Redis Cache
+  redis:
+    url: "${REDIS_URL:redis://localhost:6379/0}"
+    host: "${REDIS_HOST:localhost}"
+    port: ${REDIS_PORT:6379}
+    db: ${REDIS_DB:0}
+    password: "${REDIS_PASSWORD:}"
+    decode_responses: true
+    socket_connect_timeout: 5
+    socket_timeout: 5
+
+# ============================================================================
+# Backtesting Configuration
+# ============================================================================
+backtesting:
+  # Default Parameters
+  defaults:
+    initial_capital: ${BACKTEST_INITIAL_CAPITAL:100000}
+    commission: ${BACKTEST_COMMISSION:0.0}
+    start_date: "${BACKTEST_START_DATE:2023-01-01}"
+    end_date: "${BACKTEST_END_DATE:today}"
+    
+  # Backtrader Settings
+  backtrader:
+    cash: 100000
+    commission: 0.0
+    slip_perc: 0.001  # 0.1% slippage
+    slip_fixed: 0.0
+    slip_open: false
+    slip_match: true
+    
+  # VectorBT Settings
+  vectorbt:
+    freq: "1D"  # Data frequency
+    init_cash: 100000
+    fees: 0.0
+    slippage: 0.001
+    
+  # Performance Metrics
+  metrics:
+    benchmark: "SPY"
+    risk_free_rate: 0.02  # 2% annual risk-free rate
+    calculate_detailed_stats: true
+    save_trade_analysis: true
+
+# ============================================================================
+# Strategy Configuration
+# ============================================================================
+strategies:
+  # Default Strategy Parameters
+  defaults:
+    max_positions: 5
+    position_size: 0.1  # 10% of portfolio per position
+    stop_loss: 0.05  # 5% stop loss
+    take_profit: 0.15  # 15% take profit
+    
+  # Strategy-Specific Settings
+  momentum:
+    lookback_period: 20
+    momentum_threshold: 0.02
+    volume_threshold: 1000000
+    
+  options:
+    # Options Strategy Defaults
+    max_dte: 45  # Maximum days to expiration
+    min_dte: 7   # Minimum days to expiration
+    delta_target: 0.3
+    theta_threshold: -0.1
+    iv_percentile_min: 30
+    iv_percentile_max: 70
+
+# ============================================================================
+# Trading Bots Configuration
+# ============================================================================
+bots:
+  # Discord Bot
+  discord:
+    token: "${DISCORD_BOT_TOKEN:}"
+    guild_id: "${DISCORD_GUILD_ID:}"
+    channel_id: "${DISCORD_CHANNEL_ID:}"
+    command_prefix: "!"
+    enabled: false
+    
+  # Telegram Bot
+  telegram:
+    token: "${TELEGRAM_BOT_TOKEN:}"
+    chat_id: "${TELEGRAM_CHAT_ID:}"
+    enabled: false
+    
+  # Bot Features
+  features:
+    trade_notifications: true
+    portfolio_updates: true
+    market_alerts: true
+    command_interface: true
+    subscription_service: false
+
+# ============================================================================
+# Data Storage and Caching
+# ============================================================================
+storage:
+  # Local Data Directory
+  data_dir: "${DATA_DIR:./data}"
+  
+  # Caching Settings
+  cache:
+    enabled: ${ENABLE_DATA_CACHE:true}
+    expiry_seconds: ${CACHE_EXPIRY_SECONDS:86400}
+    max_size_mb: ${MAX_CACHE_SIZE_MB:1024}
+    
+  # Data Retention
+  retention:
+    market_data_days: 365
+    trade_data_days: 1095  # 3 years
+    log_data_days: 90
+    
+  # File Formats
+  formats:
+    default: "parquet"  # parquet, csv, hdf5
+    compression: "snappy"
+
+# ============================================================================
+# API and Rate Limiting
+# ============================================================================
+api:
+  # Rate Limiting
+  rate_limits:
+    alpaca_api: ${ALPACA_API_RATE_LIMIT:200}
+    market_data: ${MARKET_DATA_RATE_LIMIT:200}
+    enabled: ${ENABLE_RATE_LIMITING:true}
+    
+  # Timeouts
+  timeouts:
+    connect: 10  # seconds
+    read: 30     # seconds
+    total: 60    # seconds
+    
+  # Retry Settings
+  retries:
+    max_attempts: 3
+    backoff_factor: 1.0
+    status_forcelist: [429, 500, 502, 503, 504]
+
+# ============================================================================
+# Logging Configuration
+# ============================================================================
+logging:
+  level: "${LOG_LEVEL:INFO}"
+  verbose: ${VERBOSE_LOGGING:true}
+  
+  # Log Formatters
+  formatters:
+    detailed: "[{time:YYYY-MM-DD HH:mm:ss}] {level} | {name}:{line} | {message}"
+    simple: "{time:HH:mm:ss} | {level} | {message}"
+    
+  # Log Handlers
+  handlers:
+    console:
+      enabled: true
+      level: "INFO"
+      formatter: "simple"
+    file:
+      enabled: true
+      level: "DEBUG"
+      filename: "logs/alpaca_improved.log"
+      rotation: "daily"
+      retention: "30 days"
+      formatter: "detailed"
+      
+  # Module-Specific Logging
+  modules:
+    alpaca_improved.trading: "INFO"
+    alpaca_improved.data: "INFO" 
+    alpaca_improved.strategies: "DEBUG"
+    alpaca_improved.backtesting: "INFO"
+
+# ============================================================================
+# Monitoring and Alerting
+# ============================================================================
+monitoring:
+  # Error Tracking
+  sentry:
+    dsn: "${SENTRY_DSN:}"
+    enabled: false
+    
+  # Performance Monitoring
+  performance:
+    enabled: ${ENABLE_PERFORMANCE_MONITORING:true}
+    sample_rate: 0.1
+    
+  # Email Alerts
+  email:
+    smtp_host: "${SMTP_HOST:}"
+    smtp_port: ${SMTP_PORT:587}
+    username: "${SMTP_USERNAME:}"
+    password: "${SMTP_PASSWORD:}"
+    from_address: "${ALERT_EMAIL_FROM:}"
+    to_addresses: ["${ALERT_EMAIL_TO:}"]
+    
+  # Alert Thresholds
+  alerts:
+    max_drawdown_percent: 10.0
+    daily_loss_percent: 5.0
+    failed_trades_count: 5
+    api_error_rate: 0.05
+
+# ============================================================================
+# Web Interface Configuration
+# ============================================================================
+web:
+  # Streamlit Dashboard
+  streamlit:
+    host: "${WEB_HOST:localhost}"
+    port: ${WEB_PORT:8501}
+    theme: "dark"
+    
+  # FastAPI Server
+  fastapi:
+    host: "${API_HOST:localhost}"
+    port: ${API_PORT:8000}
+    cors_enabled: ${ENABLE_CORS:true}
+    docs_enabled: true
+    
+  # Security
+  security:
+    enable_authentication: true
+    session_timeout: 3600  # 1 hour
+    max_login_attempts: 5
+
+# ============================================================================
+# Testing and Development
+# ============================================================================
+testing:
+  test_mode: ${TEST_MODE:false}
+  skip_api_auth: ${SKIP_API_AUTH:false}
+  use_mock_data: ${USE_MOCK_DATA:false}
+  
+  # Test Data
+  fixtures:
+    market_data_file: "tests/fixtures/market_data.parquet"
+    options_data_file: "tests/fixtures/options_data.parquet"
+    
+# ============================================================================
+# Feature Flags
+# ============================================================================
+features:
+  experimental: ${ENABLE_EXPERIMENTAL_FEATURES:false}
+  machine_learning: ${ENABLE_ML_FEATURES:false}
+  options_trading: ${ENABLE_OPTIONS_TRADING:true}
+  crypto_trading: ${ENABLE_CRYPTO_TRADING:false}
+  international_markets: ${ENABLE_INTERNATIONAL_MARKETS:false} 

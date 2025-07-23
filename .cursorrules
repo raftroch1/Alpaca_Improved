@@ -1,0 +1,237 @@
+# Alpaca Improved - Cursor Development Rules
+
+## 🎯 Project Context
+This is a production-ready options trading platform built on Alpaca's ecosystem. Maintain institutional-grade code quality, comprehensive testing, and robust error handling throughout all development.
+
+## 📐 Code Style & Standards
+
+### Python Standards
+- **PEP 8 Compliance**: Follow PEP 8 style guide strictly
+- **Type Hints**: All functions must include proper type hints
+- **Docstrings**: Use Google-style docstrings for all modules, classes, and functions
+- **Line Length**: Maximum 88 characters (Black formatter standard)
+- **Import Organization**: Use isort for consistent import ordering
+
+### Code Quality
+- **No Dead Code**: Remove commented-out code, unused imports, and unreachable code
+- **DRY Principle**: Don't repeat yourself - extract common patterns into utilities
+- **SOLID Principles**: Follow SOLID design principles for class design
+- **Error Handling**: Always include appropriate exception handling with specific exception types
+
+## 🏗️ Architecture Guidelines
+
+### Project Structure
+```
+src/
+├── data/           # Data extraction, storage, and management
+├── strategies/     # Strategy base classes and implementations  
+├── backtesting/    # Backtrader and VectorBT integration
+├── trading/        # Live trading infrastructure
+├── bots/          # Discord/Telegram bot implementations
+└── utils/         # Shared utilities and helpers
+```
+
+### Component Design
+- **Modular Architecture**: Create loosely coupled, highly cohesive components
+- **Interface Segregation**: Define clear interfaces for major components
+- **Dependency Injection**: Use dependency injection for testability
+- **Configuration Management**: Centralize all configuration in config/ directory
+
+## 📊 Trading & Financial Code Standards
+
+### Data Handling
+- **Real Data Only**: Never use simulated or fake market data in backtesting
+- **Data Validation**: Always validate market data for completeness and accuracy
+- **Timezone Awareness**: Use timezone-aware datetime objects for all market data
+- **Precision**: Use Decimal for monetary calculations, never float
+
+### Strategy Development
+- **Strategy-Backtest Sync**: Ensure strategy logic exactly matches backtest implementation
+- **Paper Trading First**: Always test strategies in paper trading before live
+- **Risk Management**: Include position sizing and risk management in all strategies
+- **Performance Metrics**: Calculate and log comprehensive performance metrics
+
+### API Integration
+- **Rate Limiting**: Respect Alpaca API rate limits with proper throttling
+- **Error Recovery**: Implement exponential backoff for API failures
+- **Credential Security**: Never hardcode API keys - use environment variables
+- **Paper vs Live**: Clearly distinguish between paper and live trading modes
+
+## 🧪 Testing Requirements
+
+### Test Coverage
+- **Minimum 80% Coverage**: Maintain at least 80% test coverage
+- **Unit Tests**: Test all functions and methods in isolation
+- **Integration Tests**: Test component interactions and API integrations
+- **End-to-End Tests**: Test complete trading workflows
+
+### Test Organization
+```
+tests/
+├── unit/           # Unit tests for individual components
+├── integration/    # Integration tests for component interactions
+├── e2e/           # End-to-end workflow tests
+└── fixtures/      # Test data and fixtures
+```
+
+### Testing Patterns
+- **Arrange-Act-Assert**: Structure all tests with clear AAA pattern
+- **Mock External Services**: Mock all external APIs and services
+- **Deterministic Tests**: Ensure tests produce consistent results
+- **Fast Tests**: Keep unit tests under 100ms execution time
+
+## 🔒 Security & Safety
+
+### Financial Safety
+- **Position Limits**: Always implement position size limits
+- **Stop Losses**: Include stop-loss mechanisms in all strategies
+- **Paper Trading Guards**: Prevent accidental live trading during development
+- **Balance Checks**: Verify account balance before executing trades
+
+### Code Security
+- **Input Validation**: Validate all user inputs and external data
+- **SQL Injection Prevention**: Use parameterized queries only
+- **Secure Logging**: Never log sensitive information (API keys, account details)
+- **Environment Isolation**: Maintain strict separation between dev/test/prod environments
+
+## 📝 Documentation Standards
+
+### Code Documentation
+- **Module Docstrings**: Every module must have a comprehensive docstring
+- **Class Documentation**: Document class purpose, attributes, and usage examples
+- **Function Documentation**: Include parameters, return values, and examples
+- **Inline Comments**: Explain complex business logic and mathematical formulas
+
+### Documentation Format
+```python
+def calculate_option_greeks(
+    spot_price: float,
+    strike_price: float,
+    time_to_expiry: float,
+    risk_free_rate: float,
+    volatility: float
+) -> Dict[str, float]:
+    """Calculate option Greeks using Black-Scholes model.
+    
+    Args:
+        spot_price: Current price of the underlying asset
+        strike_price: Strike price of the option
+        time_to_expiry: Time to expiration in years
+        risk_free_rate: Risk-free interest rate
+        volatility: Implied volatility of the option
+        
+    Returns:
+        Dictionary containing delta, gamma, theta, vega, and rho
+        
+    Example:
+        >>> greeks = calculate_option_greeks(100, 105, 0.25, 0.05, 0.2)
+        >>> print(f"Delta: {greeks['delta']:.4f}")
+        Delta: 0.4567
+    """
+```
+
+## 🔧 Development Workflow
+
+### Git Practices
+- **Feature Branches**: Create feature branches for all new development
+- **Conventional Commits**: Use conventional commit messages (feat:, fix:, docs:, etc.)
+- **Pull Request Reviews**: All code must be reviewed before merging
+- **Clean History**: Squash commits before merging to maintain clean history
+
+### Branch Strategy
+```
+main           # Production-ready code only
+develop        # Integration branch for features
+feature/*      # Individual feature development
+hotfix/*       # Critical production fixes
+release/*      # Release preparation branches
+```
+
+### Code Review Checklist
+- [ ] Code follows style guidelines and passes linting
+- [ ] All tests pass and coverage requirements met
+- [ ] Documentation is complete and accurate
+- [ ] Security considerations addressed
+- [ ] Performance implications considered
+- [ ] Error handling implemented properly
+
+## 🚀 Performance Guidelines
+
+### Optimization Priorities
+1. **Correctness First**: Never sacrifice correctness for performance
+2. **Profile Before Optimizing**: Use profiling tools to identify bottlenecks
+3. **Vectorization**: Use NumPy/Pandas vectorized operations when possible
+4. **Caching**: Implement intelligent caching for expensive operations
+5. **Database Optimization**: Optimize database queries and use appropriate indexes
+
+### Memory Management
+- **Resource Cleanup**: Always clean up resources (files, connections, etc.)
+- **Memory Profiling**: Monitor memory usage for large datasets
+- **Lazy Loading**: Load data only when needed
+- **Garbage Collection**: Understand Python's garbage collection behavior
+
+## 🔍 Debugging & Monitoring
+
+### Logging Standards
+- **Structured Logging**: Use structured logging with consistent formats
+- **Log Levels**: Use appropriate log levels (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+- **Contextual Information**: Include relevant context in log messages
+- **Performance Logging**: Log execution times for critical operations
+
+### Error Handling
+```python
+import logging
+from typing import Optional
+
+logger = logging.getLogger(__name__)
+
+def safe_api_call(symbol: str) -> Optional[dict]:
+    """Safely make API call with proper error handling."""
+    try:
+        response = alpaca_client.get_option_chain(symbol)
+        logger.info(f"Successfully retrieved option chain for {symbol}")
+        return response
+    except AlpacaAPIError as e:
+        logger.error(f"Alpaca API error for {symbol}: {e}")
+        return None
+    except ConnectionError as e:
+        logger.error(f"Connection error for {symbol}: {e}")
+        return None
+    except Exception as e:
+        logger.critical(f"Unexpected error for {symbol}: {e}")
+        raise
+```
+
+## 🎯 Implementation Priorities
+
+### Always Implement
+1. **Comprehensive error handling** with specific exception types
+2. **Detailed logging** for debugging and monitoring
+3. **Input validation** for all external data
+4. **Type hints** for all function parameters and returns
+5. **Unit tests** for all new functionality
+
+### Never Do
+1. **Hardcode credentials** or sensitive information
+2. **Use float for monetary calculations** (use Decimal instead)
+3. **Ignore API rate limits** or error responses
+4. **Deploy untested code** to production
+5. **Mix paper and live trading logic** without clear separation
+
+## 🔄 Continuous Improvement
+
+### Regular Reviews
+- **Weekly Code Reviews**: Conduct regular code quality reviews
+- **Performance Monitoring**: Monitor system performance metrics
+- **Security Audits**: Regular security reviews and dependency updates
+- **Documentation Updates**: Keep documentation current with code changes
+
+### Learning & Development
+- **Stay Current**: Keep up with Alpaca API updates and new features
+- **Best Practices**: Continuously improve development practices
+- **Community Engagement**: Participate in trading and Python communities
+- **Knowledge Sharing**: Document lessons learned and share with team
+
+---
+
+**🎯 Remember: This is a financial trading platform. Code quality, security, and reliability are not optional - they are essential for success and safety.** 

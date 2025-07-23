@@ -1,0 +1,362 @@
+# Alpaca Improved - Git Ignore Rules
+# Comprehensive ignore rules for Python trading platform
+
+# ============================================================================
+# Python
+# ============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ============================================================================
+# Virtual Environments
+# ============================================================================
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.conda/
+conda-meta/
+
+# ============================================================================
+# Security & Credentials (CRITICAL!)
+# ============================================================================
+# Environment files with secrets
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+
+# API Keys and credentials
+**/api_keys.txt
+**/credentials.json
+**/secrets.yaml
+**/config.production.yaml
+**/config.staging.yaml
+**/.secrets/
+
+# SSH keys
+*.pem
+*.key
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+
+# ============================================================================
+# Trading Data & Logs (Sensitive)
+# ============================================================================
+# Market data files
+data/
+*.csv
+*.parquet
+*.h5
+*.hdf5
+historical_data/
+market_data/
+options_data/
+
+# Log files
+logs/
+*.log
+*.log.*
+log_*.txt
+
+# Trading results and reports
+results/
+reports/
+backtest_results/
+performance_reports/
+trade_history/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# ============================================================================
+# Development Tools
+# ============================================================================
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.spyderproject
+.spyproject
+.ropeproject
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+!examples/*.ipynb
+!notebooks/templates/*.ipynb
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+test-results/
+
+# Tox
+.tox/
+
+# ============================================================================
+# Documentation
+# ============================================================================
+docs/_build/
+docs/build/
+.readthedocs.yml
+site/
+
+# ============================================================================
+# Docker
+# ============================================================================
+.dockerignore
+docker-compose.override.yml
+.docker/
+
+# ============================================================================
+# Operating System
+# ============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ============================================================================
+# Temporary and Cache Files
+# ============================================================================
+tmp/
+temp/
+*.tmp
+*.temp
+*.cache
+.cache/
+*.pid
+*.seed
+*.pid.lock
+
+# ============================================================================
+# Build and Distribution
+# ============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ============================================================================
+# Monitoring and Analytics
+# ============================================================================
+# Prometheus data
+prometheus_data/
+
+# Grafana data
+grafana_data/
+
+# Application monitoring
+newrelic.ini
+.newrelic.yml
+
+# ============================================================================
+# Cloud and Deployment
+# ============================================================================
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Kubernetes
+*.kubeconfig
+
+# AWS
+.aws/
+aws-exports.js
+
+# Google Cloud
+.gcloud/
+service-account-key.json
+
+# ============================================================================
+# Trading Platform Specific
+# ============================================================================
+# Backtest data
+backtest_cache/
+strategy_cache/
+optimization_results/
+
+# Paper trading logs
+paper_trading_logs/
+
+# Risk management alerts
+risk_alerts/
+
+# Performance monitoring
+performance_data/
+
+# Options chains cache
+options_chains/
+iv_surface_cache/
+
+# ============================================================================
+# Machine Learning
+# ============================================================================
+# Model files
+*.pkl
+*.pickle
+*.joblib
+*.model
+models/
+trained_models/
+model_cache/
+
+# Training data
+training_data/
+validation_data/
+ml_datasets/
+
+# Weights and checkpoints
+checkpoints/
+*.h5
+*.hdf5
+*.pb
+
+# ============================================================================
+# Jupyter and Research
+# ============================================================================
+research/
+experiments/
+notebooks/.ipynb_checkpoints/
+.jupyter/
+
+# ============================================================================
+# Package managers
+# ============================================================================
+poetry.lock
+Pipfile.lock
+.pdm.toml
+.pdm-python
+
+# ============================================================================
+# Linting and Formatting
+# ============================================================================
+.flake8
+.mypy_cache/
+.ruff_cache/
+
+# ============================================================================
+# Testing
+# ============================================================================
+.nox/
+.coverage.*
+.pytest_cache/
+
+# ============================================================================
+# Local development overrides
+# ============================================================================
+docker-compose.local.yml
+config.local.yaml
+.env.local
+local_settings.py
+
+# ============================================================================
+# Backup files
+# ============================================================================
+*.bak
+*.backup
+*.orig
+*.save
+
+# ============================================================================
+# Archive files
+# ============================================================================
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# ============================================================================
+# Exclude patterns for specific scenarios
+# ============================================================================
+# Allow specific config templates
+!config/config.yaml
+!config/*.template.yaml
+!config/*.example.yaml
+
+# Allow test fixtures
+!tests/fixtures/
+!tests/data/
+
+# Allow documentation assets
+!docs/assets/
+!docs/images/ 

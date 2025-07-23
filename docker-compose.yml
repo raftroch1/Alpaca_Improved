@@ -1,0 +1,238 @@
+# Alpaca Improved - Docker Compose Configuration
+# Complete development environment with all services
+
+version: '3.8'
+
+services:
+  # ============================================================================
+  # Main Application Service
+  # ============================================================================
+  alpaca-improved:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: alpaca-improved-app
+    ports:
+      - "8000:8000"    # FastAPI server
+      - "8501:8501"    # Streamlit dashboard
+    volumes:
+      - .:/app
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config:/app/config
+    environment:
+      - APP_ENV=development
+      - DATABASE_URL=postgresql://alpaca_user:alpaca_pass@postgres:5432/alpaca_improved
+      - REDIS_URL=redis://redis:6379/0
+      - ALPACA_TRADING_ENV=paper
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - alpaca-network
+
+  # ============================================================================
+  # PostgreSQL Database
+  # ============================================================================
+  postgres:
+    image: postgres:14-alpine
+    container_name: alpaca-improved-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: alpaca_improved
+      POSTGRES_USER: alpaca_user
+      POSTGRES_PASSWORD: alpaca_pass
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alpaca_user -d alpaca_improved"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - alpaca-network
+
+  # ============================================================================
+  # Redis Cache
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: alpaca-improved-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass redis_pass
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "redis_pass", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - alpaca-network
+
+  # ============================================================================
+  # Jupyter Lab (for research and development)
+  # ============================================================================
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: alpaca-improved-jupyter
+    ports:
+      - "8888:8888"
+    volumes:
+      - .:/app
+      - ./notebooks:/app/notebooks
+      - ./data:/app/data
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=alpaca-improved
+    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --notebook-dir=/app
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - alpaca-network
+
+  # ============================================================================
+  # Grafana (for monitoring and dashboards)
+  # ============================================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: alpaca-improved-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    restart: unless-stopped
+    networks:
+      - alpaca-network
+
+  # ============================================================================
+  # Prometheus (for metrics collection)
+  # ============================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: alpaca-improved-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - alpaca-network
+
+  # ============================================================================
+  # PgAdmin (for database management)
+  # ============================================================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: alpaca-improved-pgadmin
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@alpacaimproved.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - alpaca-network
+
+  # ============================================================================
+  # Testing Service
+  # ============================================================================
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: testing
+    container_name: alpaca-improved-test
+    volumes:
+      - .:/app
+      - ./test-results:/app/test-results
+    environment:
+      - APP_ENV=testing
+      - DATABASE_URL=postgresql://alpaca_user:alpaca_pass@postgres:5432/alpaca_improved_test
+      - REDIS_URL=redis://redis:6379/1
+    env_file:
+      - .env.test
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: pytest -v --cov=src/alpaca_improved --cov-report=html:/app/test-results/coverage
+    profiles:
+      - testing
+    networks:
+      - alpaca-network
+
+# ============================================================================
+# Networks
+# ============================================================================
+networks:
+  alpaca-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# ============================================================================
+# Volumes
+# ============================================================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  grafana_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+# ============================================================================
+# Development Override
+# ============================================================================
+# Use: docker-compose -f docker-compose.yml -f docker-compose.override.yml up
+# The override file (docker-compose.override.yml) can contain development-specific
+# configurations like volume mounts, environment variables, and debug settings. 
